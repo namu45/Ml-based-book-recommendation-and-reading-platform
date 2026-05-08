@@ -1,0 +1,755 @@
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BookWise Admin — Book Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ───── RESET & VARIABLES ───── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:              #0d0f14;
+      --surface:         #13161e;
+      --surface-2:       #1a1e2a;
+      --surface-3:       #1f2333;
+      --border:          #252a38;
+      --border-2:        #2e3448;
+      --gold:            #c9a84c;
+      --gold-light:      #e8c97a;
+      --gold-dim:        rgba(201,168,76,.12);
+      --text-1:          #eae8e0;
+      --text-2:          #9a9896;
+      --text-3:          #5c5c5e;
+      --accent-red:      #c96060;
+      --accent-red-dim:  rgba(201,96,96,.12);
+      --accent-teal:     #4ca8a0;
+      --accent-teal-dim: rgba(76,168,160,.12);
+      --accent-blue:     #5b80c9;
+      --accent-blue-dim: rgba(91,128,201,.12);
+      --accent-green:    #5ba87a;
+      --accent-green-dim:rgba(91,168,122,.12);
+      --accent-amber:    #c98a3c;
+      --accent-amber-dim:rgba(201,138,60,.12);
+      --sidebar-w:       260px;
+      --radius:          12px;
+      --radius-sm:       8px;
+      --radius-xs:       6px;
+      --shadow:          0 4px 24px rgba(0,0,0,.45);
+    }
+
+    html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-1); }
+    a { text-decoration: none; color: inherit; }
+
+    /* ───── LAYOUT ───── */
+    .admin-shell { display: flex; min-height: 100vh; }
+
+    /* ───── SIDEBAR ───── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      padding: 0 0 24px;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 28px 24px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--gold), #8b5e1a);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 18px rgba(201,168,76,.3);
+      flex-shrink: 0;
+    }
+    .logo-text strong {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px; color: var(--gold-light);
+      letter-spacing: .02em; display: block;
+    }
+    .logo-text span {
+      font-size: 10px; text-transform: uppercase;
+      letter-spacing: .14em; color: var(--text-3);
+      margin-top: 1px; display: block;
+    }
+    .sidebar-section { padding: 20px 16px 8px; }
+    .sidebar-section-label {
+      font-size: 10px; text-transform: uppercase;
+      letter-spacing: .15em; color: var(--text-3);
+      padding: 0 8px; margin-bottom: 6px;
+    }
+    .nav-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      color: var(--text-2); font-size: 14px; font-weight: 500;
+      transition: all .18s ease; margin-bottom: 2px;
+    }
+    .nav-link .nav-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+    .nav-link:hover { background: var(--gold-dim); color: var(--gold-light); }
+    .nav-link.active {
+      background: var(--gold-dim); color: var(--gold);
+      border-left: 2px solid var(--gold); padding-left: 10px;
+    }
+    .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--border); }
+    .logout-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      color: var(--accent-red); font-size: 14px; font-weight: 500;
+      transition: all .18s ease;
+    }
+    .logout-btn:hover { background: rgba(201,96,96,.1); }
+
+    /* ───── MAIN ───── */
+    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ───── TOPBAR ───── */
+    .topbar {
+      height: 64px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px;
+      position: sticky; top: 0; z-index: 90;
+    }
+    .topbar-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text-1); font-weight: 600; }
+    .topbar-title span { color: var(--gold); }
+    .admin-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 50px; padding: 6px 14px 6px 6px;
+      font-size: 13px; color: var(--text-2);
+    }
+    .admin-avatar {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--gold), #8b5e1a);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: #fff; font-weight: 600;
+    }
+
+    /* ───── PAGE CONTENT ───── */
+    .page-content { padding: 36px 32px; flex: 1; }
+
+    /* ───── PAGE HEADER ───── */
+    .page-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 28px;
+      animation: fadeUp .4s ease both;
+    }
+    .page-header-left h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 30px; font-weight: 700; color: var(--text-1);
+    }
+    .page-header-left h1 em { color: var(--gold); font-style: normal; }
+    .page-header-left p { margin-top: 6px; color: var(--text-2); font-size: 14px; font-weight: 300; }
+    .count-badge {
+      font-family: 'DM Mono', monospace; font-size: 13px;
+      background: var(--gold-dim); border: 1px solid rgba(201,168,76,.25);
+      color: var(--gold); padding: 6px 16px; border-radius: 50px; white-space: nowrap;
+    }
+
+    /* ───── CONTROLS ROW ───── */
+    .controls-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px; flex-wrap: wrap;
+      animation: fadeUp .42s ease both; animation-delay: .05s;
+    }
+
+    /* Search + filter combined */
+    .search-form {
+      display: flex; align-items: center;
+      flex: 1; min-width: 280px; max-width: 560px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); overflow: hidden;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .search-form:focus-within {
+      border-color: rgba(201,168,76,.4);
+      box-shadow: 0 0 0 3px rgba(201,168,76,.08);
+    }
+    .search-icon { padding: 0 12px; color: var(--text-3); font-size: 15px; pointer-events: none; user-select: none; }
+    .search-form input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--text-1); font-family: 'DM Sans', sans-serif;
+      font-size: 14px; padding: 11px 0;
+    }
+    .search-form input::placeholder { color: var(--text-3); }
+
+    /* Filter dropdown inside search bar */
+    .search-form .filter-divider {
+      width: 1px; height: 24px; background: var(--border); flex-shrink: 0;
+    }
+    .search-form select {
+      background: transparent; border: none; outline: none;
+      color: var(--text-2); font-family: 'DM Sans', sans-serif;
+      font-size: 13px; padding: 0 14px; cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235c5c5e'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+      height: 100%;
+    }
+    .search-form select option { background: var(--surface-2); color: var(--text-1); }
+    .search-form .search-submit {
+      background: var(--gold-dim); border: none; border-left: 1px solid var(--border);
+      color: var(--gold); font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 600; padding: 10px 18px;
+      cursor: pointer; transition: background .15s ease; white-space: nowrap;
+    }
+    .search-form .search-submit:hover { background: rgba(201,168,76,.22); }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: linear-gradient(135deg, var(--gold), #a87d28);
+      color: #1a1100; font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px; font-weight: 600; padding: 10px 20px;
+      border: none; border-radius: var(--radius-sm); cursor: pointer;
+      transition: opacity .18s ease, transform .18s ease, box-shadow .18s ease;
+      box-shadow: 0 2px 12px rgba(201,168,76,.25); white-space: nowrap;
+    }
+    .btn-primary:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 4px 18px rgba(201,168,76,.35); }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* ───── FORM PANEL ───── */
+    .form-panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      margin-bottom: 24px; animation: slideDown .25s ease both;
+    }
+    .form-panel.hidden { display: none; }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px; border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+    .form-panel-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px; font-weight: 600; color: var(--text-1);
+    }
+    .form-panel-tag { display: flex; align-items: center; gap: 10px; }
+    .form-panel-tag span {
+      font-size: 11px; text-transform: uppercase; letter-spacing: .12em;
+      color: var(--gold); background: var(--gold-dim);
+      padding: 3px 10px; border-radius: 50px;
+    }
+    .close-form-btn {
+      background: none; border: none; color: var(--text-3);
+      font-size: 20px; cursor: pointer; line-height: 1;
+      padding: 0 4px; transition: color .15s;
+    }
+    .close-form-btn:hover { color: var(--accent-red); }
+
+    .form-panel-body { padding: 28px 24px; }
+
+    /* Django form fields auto-styling */
+    .form-panel-body p { display: contents; }
+    .form-panel-body p label {
+      font-size: 12px; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--text-3); font-weight: 500; display: block; margin-bottom: 6px;
+    }
+    .form-panel-body p input,
+    .form-panel-body p select,
+    .form-panel-body p textarea {
+      background: var(--surface-2); border: 1px solid var(--border-2);
+      border-radius: var(--radius-xs); color: var(--text-1);
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      padding: 10px 14px; outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease;
+      width: 100%; margin-bottom: 16px; display: block;
+    }
+    .form-panel-body p input[type="file"] {
+      padding: 8px 14px; cursor: pointer; color: var(--text-2);
+    }
+    .form-panel-body p input:focus,
+    .form-panel-body p select:focus,
+    .form-panel-body p textarea:focus {
+      border-color: rgba(201,168,76,.45);
+      box-shadow: 0 0 0 3px rgba(201,168,76,.08);
+    }
+    .form-panel-body p select option { background: var(--surface-2); color: var(--text-1); }
+    .form-panel-body p textarea { resize: vertical; min-height: 100px; }
+
+    .form-actions {
+      display: flex; align-items: center; gap: 12px;
+      padding: 18px 24px; border-top: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border-2);
+      color: var(--text-2); font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px; font-weight: 500; padding: 9px 18px;
+      border-radius: var(--radius-sm); cursor: pointer; transition: all .15s ease;
+    }
+    .btn-ghost:hover { border-color: var(--text-3); color: var(--text-1); }
+
+    /* ───── TABLE CARD ───── */
+    .table-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      animation: fadeUp .48s ease both; animation-delay: .1s;
+    }
+    .table-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px; border-bottom: 1px solid var(--border);
+    }
+    .table-card-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px; font-weight: 600; color: var(--text-1);
+    }
+    .table-meta { font-size: 12px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+
+    .table-wrap { overflow-x: auto; }
+
+    .data-table { width: 100%; border-collapse: collapse; min-width: 860px; }
+    .data-table thead tr { background: var(--surface-2); border-bottom: 1px solid var(--border); }
+    .data-table thead th {
+      padding: 13px 16px;
+      text-align: left; font-size: 10.5px;
+      text-transform: uppercase; letter-spacing: .12em;
+      color: var(--text-3); font-weight: 600; white-space: nowrap;
+    }
+    .data-table thead th:first-child { padding-left: 24px; }
+    .data-table thead th:last-child  { padding-right: 24px; text-align: right; }
+
+    .data-table tbody tr {
+      border-bottom: 1px solid rgba(37,42,56,.6);
+      transition: background .15s ease;
+    }
+    .data-table tbody tr:last-child { border-bottom: none; }
+    .data-table tbody tr:hover { background: var(--surface-2); }
+
+    .data-table tbody td {
+      padding: 14px 16px; font-size: 13.5px;
+      color: var(--text-1); vertical-align: middle;
+    }
+    .data-table tbody td:first-child { padding-left: 24px; }
+    .data-table tbody td:last-child  { padding-right: 24px; }
+
+    /* Cell types */
+    .td-id     { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-3); }
+    .td-title  {
+      font-weight: 600; color: var(--gold-light);
+      max-width: 200px; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .td-author { color: var(--text-2); font-size: 13px; }
+    .td-pages  { font-family: 'DM Mono', monospace; font-size: 12.5px; color: var(--text-2); text-align: center; }
+    .td-source {
+      font-family: 'DM Mono', monospace; font-size: 11.5px;
+      color: var(--text-3); text-transform: uppercase; letter-spacing: .05em;
+    }
+
+    /* Genre pill */
+    .genre-pill {
+      display: inline-block;
+      font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 50px;
+      text-transform: uppercase; letter-spacing: .07em;
+      background: var(--accent-blue-dim);
+      color: var(--accent-blue);
+      border: 1px solid rgba(91,128,201,.2);
+      white-space: nowrap;
+    }
+
+    /* File badge */
+    .file-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11.5px; font-weight: 600; padding: 4px 10px;
+      border-radius: 50px; text-transform: uppercase; letter-spacing: .07em;
+    }
+    .file-yes {
+      background: var(--accent-green-dim); color: var(--accent-green);
+      border: 1px solid rgba(91,168,122,.2);
+    }
+    .file-no {
+      background: var(--surface-3); color: var(--text-3);
+      border: 1px solid var(--border);
+    }
+
+    /* Action cell */
+    .action-cell { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+    .action-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+      padding: 6px 11px; border-radius: var(--radius-xs);
+      border: 1px solid transparent; cursor: pointer;
+      transition: all .15s ease; white-space: nowrap; text-decoration: none;
+    }
+    .btn-edit {
+      background: var(--accent-blue-dim); color: var(--accent-blue);
+      border-color: rgba(91,128,201,.2);
+    }
+    .btn-edit:hover { background: rgba(91,128,201,.22); border-color: rgba(91,128,201,.4); }
+    .btn-delete {
+      background: transparent; color: var(--text-3); border-color: var(--border);
+    }
+    .btn-delete:hover { background: var(--accent-red-dim); color: var(--accent-red); border-color: rgba(201,96,96,.3); }
+
+    /* Empty */
+    .empty-row td {
+      padding: 52px 24px !important; text-align: center;
+      color: var(--text-3); font-size: 14px;
+    }
+    .empty-icon { font-size: 32px; margin-bottom: 10px; display: block; opacity: .5; }
+
+    /* ───── PAGINATION ───── */
+    .pagination {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; padding: 20px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .pagination a {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      padding: 7px 14px; border-radius: var(--radius-sm);
+      background: var(--surface-2); border: 1px solid var(--border-2);
+      color: var(--text-2); transition: all .15s ease;
+    }
+    .pagination a:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+    .pagination-info {
+      font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-3);
+      padding: 7px 16px; background: var(--surface-2);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+    }
+    .pagination-info strong { color: var(--gold); }
+
+    /* ───── MODAL ───── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.65);
+      backdrop-filter: blur(4px); z-index: 999;
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border-2);
+      border-radius: var(--radius); padding: 32px; max-width: 380px;
+      width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.6);
+      animation: modalIn .22s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(.95) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-icon { font-size: 32px; margin-bottom: 14px; }
+    .modal h4 {
+      font-family: 'Playfair Display', serif; font-size: 19px;
+      color: var(--text-1); margin-bottom: 8px;
+    }
+    .modal p { font-size: 13.5px; color: var(--text-2); line-height: 1.6; margin-bottom: 24px; }
+    .modal-actions { display: flex; gap: 10px; }
+    .btn-danger {
+      flex: 1; background: var(--accent-red); color: #fff; border: none;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+      padding: 10px; border-radius: var(--radius-sm); cursor: pointer;
+      transition: opacity .15s ease; text-align: center; display: block;
+    }
+    .btn-danger:hover { opacity: .88; }
+
+    /* ───── ANIMATIONS ───── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ───── SCROLLBAR ───── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+    /* ───── RESPONSIVE ───── */
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .main { margin-left: 0; }
+      .page-content { padding: 20px 16px; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .controls-row { flex-wrap: wrap; }
+      .search-form { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="admin-shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">📚</div>
+      <div class="logo-text">
+        <strong>BookWise</strong>
+        <span>Admin Console</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <p class="sidebar-section-label">Navigation</p>
+      <a href="{% url 'admin_dashboard' %}" class="nav-link">
+        <span class="nav-icon">◈</span> Dashboard
+      </a>
+      <a href="{% url 'admin_users' %}" class="nav-link">
+        <span class="nav-icon">◉</span> Users
+      </a>
+      <a href="{% url 'admin_books' %}" class="nav-link active">
+        <span class="nav-icon">◫</span> Books
+      </a>
+      <a href="{% url 'admin_userbooks' %}" class="nav-link">
+        <span class="nav-icon">◧</span> User Books
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="{% url 'admin_logout' %}" class="logout-btn">
+        <span class="nav-icon">⏻</span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-title"><span>Book</span>Wise Admin</div>
+      <div class="admin-badge">
+        <div class="admin-avatar">A</div>
+        Administrator
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1><em>Book</em> Management</h1>
+          <p>View, add, edit and manage the entire book catalogue.</p>
+        </div>
+        <div class="count-badge">
+          {{ books.paginator.count }} book{{ books.paginator.count|pluralize }}
+        </div>
+      </div>
+
+      <!-- Controls Row -->
+      <div class="controls-row">
+        <form class="search-form" method="GET" id="searchForm">
+          <span class="search-icon">⌕</span>
+          <input
+            type="text"
+            name="q"
+            placeholder="Search by title, author, genre…"
+            value="{{ query|default:'' }}"
+            autocomplete="off"
+          >
+          <div class="filter-divider"></div>
+          <select name="filter" onchange="document.getElementById('searchForm').submit()">
+            <option value="all"          {% if filter_type == 'all' %}selected{% endif %}>All Books</option>
+            <option value="with_file"    {% if filter_type == 'with_file' %}selected{% endif %}>With File</option>
+            <option value="without_file" {% if filter_type == 'without_file' %}selected{% endif %}>Without File</option>
+          </select>
+          <button type="submit" class="search-submit">Search</button>
+        </form>
+
+        {% if not editing %}
+        <button class="btn-primary" id="showFormBtn">＋ Add Book</button>
+        {% endif %}
+      </div>
+
+      <!-- ── Add / Edit Form Panel ── -->
+      <div class="form-panel {% if not editing %}hidden{% endif %}" id="bookFormPanel">
+        <div class="form-panel-header">
+          <h3>{% if editing %}Edit Book{% else %}Add New Book{% endif %}</h3>
+          <div class="form-panel-tag">
+            <span>{% if editing %}Editing{% else %}New{% endif %}</span>
+            <button class="close-form-btn" id="closeFormBtn" type="button" title="Close">✕</button>
+          </div>
+        </div>
+        <div class="form-panel-body">
+          <form method="POST" enctype="multipart/form-data" id="bookForm">
+            {% csrf_token %}
+            {{ form.as_p }}
+          </form>
+        </div>
+        <div class="form-actions">
+          <button type="submit" form="bookForm" class="btn-primary">
+            {% if editing %}✔ Update Book{% else %}✔ Create Book{% endif %}
+          </button>
+          <button type="button" class="btn-ghost" id="cancelFormBtn">Cancel</button>
+        </div>
+      </div>
+
+      <!-- ── Table Card ── -->
+      <div class="table-card">
+        <div class="table-card-header">
+          <h3>Book Catalogue</h3>
+          <span class="table-meta">
+            {% if query %}
+              Results for "{{ query }}"{% if filter_type != 'all' %} · {{ filter_type|title }}{% endif %}
+            {% elif filter_type != 'all' %}
+              Filtered: {{ filter_type|capfirst }}
+            {% else %}
+              Showing all books
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Pages</th>
+                <th>Source</th>
+                <th>File</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for book in books %}
+              <tr>
+                <td class="td-id">#{{ book.id }}</td>
+                <td class="td-title" title="{{ book.title }}">{{ book.title }}</td>
+                <td class="td-author">{{ book.display_author|default:"—" }}</td>
+                <td>
+                  {% if book.display_genre %}
+                    <span class="genre-pill">{{ book.display_genre }}</span>
+                  {% else %}
+                    <span style="color:var(--text-3);font-size:13px;">—</span>
+                  {% endif %}
+                </td>
+                <td class="td-pages">{{ book.total_pages|default:"—" }}</td>
+                <td class="td-source">{{ book.source|default:"—" }}</td>
+                <td>
+                  {% if book.file_path %}
+                    <span class="file-badge file-yes">✓ Yes</span>
+                  {% else %}
+                    <span class="file-badge file-no">✕ No</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="action-cell">
+                    <a href="?edit={{ book.id }}" class="action-btn btn-edit">✎ Edit</a>
+                    <button
+                      class="action-btn btn-delete"
+                      type="button"
+                      onclick="confirmDelete('{% url 'delete_book' book.id %}', '{{ book.title|escapejs }}')"
+                      title="Delete this book">
+                      ✕
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr class="empty-row">
+                <td colspan="8">
+                  <span class="empty-icon">📭</span>
+                  No books found{% if query %} matching "{{ query }}"{% endif %}{% if filter_type != 'all' %} with current filter{% endif %}.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if books.paginator.num_pages > 1 %}
+        <div class="pagination">
+          {% if books.has_previous %}
+            <a href="?page={{ books.previous_page_number }}&q={{ query }}&filter={{ filter_type }}">← Prev</a>
+          {% endif %}
+
+          <span class="pagination-info">
+            Page <strong>{{ books.number }}</strong> of <strong>{{ books.paginator.num_pages }}</strong>
+          </span>
+
+          {% if books.has_next %}
+            <a href="?page={{ books.next_page_number }}&q={{ query }}&filter={{ filter_type }}">Next →</a>
+          {% endif %}
+        </div>
+        {% endif %}
+
+      </div><!-- /table-card -->
+
+    </div><!-- /page-content -->
+  </div><!-- /main -->
+
+</div><!-- /admin-shell -->
+
+<!-- ═══ DELETE CONFIRM MODAL ═══ -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-icon">⚠</div>
+    <h4>Delete Book?</h4>
+    <p id="modalMessage">This action is permanent and cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()" style="flex:1;">Cancel</button>
+      <a href="#" class="btn-danger" id="confirmDeleteBtn">Delete</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── Form Toggle ── */
+  const showBtn    = document.getElementById('showFormBtn');
+  const closeBtn   = document.getElementById('closeFormBtn');
+  const cancelBtn  = document.getElementById('cancelFormBtn');
+  const formPanel  = document.getElementById('bookFormPanel');
+
+  function openForm() {
+    formPanel.classList.remove('hidden');
+    if (showBtn) showBtn.style.display = 'none';
+    formPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  function closeForm() {
+    formPanel.classList.add('hidden');
+    if (showBtn) showBtn.style.display = '';
+  }
+
+  if (showBtn)   showBtn.addEventListener('click',  openForm);
+  if (closeBtn)  closeBtn.addEventListener('click',  closeForm);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeForm);
+
+  /* ── Delete Modal ── */
+  function confirmDelete(url, title) {
+    document.getElementById('modalMessage').textContent =
+      `You are about to permanently delete "${title}" and all its associated data. This cannot be undone.`;
+    document.getElementById('confirmDeleteBtn').href = url;
+    document.getElementById('deleteModal').classList.add('active');
+  }
+  function closeModal() {
+    document.getElementById('deleteModal').classList.remove('active');
+  }
+
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+</body>
+</html>
+{% endblock %}

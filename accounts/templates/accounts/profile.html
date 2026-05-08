@@ -1,0 +1,601 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile – BookWise</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <!-- <style>
+        .dashboard-container { display:flex; min-height:100vh; }
+        .sidebar { width:250px; background:#f8f8f8; padding:1.5rem; }
+        .sidebar .logo { font-size:1.5rem; font-weight:bold; margin-bottom:2rem; }
+        .sidebar nav a { display:block; padding:0.8rem 0; color:#333; text-decoration:none; margin-bottom:0.5rem; border-radius:6px; }
+        .sidebar nav a.active { background:#7F53AC; color:#fff; }
+        .profile-card { margin-top:2rem; padding:1rem; background:#fff; border-radius:10px; text-align:center; }
+        .profile-card img { width:80px; height:80px; border-radius:50%; margin-bottom:0.5rem; object-fit:cover; }
+        .profile-actions a { display:block; margin-top:0.5rem; color:#7F53AC; text-decoration:none; }
+
+        .main-content { padding:2rem; flex:1; }
+        .profile-form { max-width:500px; background:#fff; padding:2rem; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:2rem; }
+        .profile-form input.input-field { width:100%; padding:0.8rem; margin-bottom:1rem; border:1px solid #ccc; border-radius:6px; font-size:1rem; }
+        .profile-form button { background-color:#7F53AC; color:#fff; padding:0.8rem 1.5rem; border:none; border-radius:6px; cursor:pointer; font-size:1rem; }
+        .messages { margin-bottom:1rem; }
+        .messages .success { color:green; }
+        .messages .error { color:red; }
+    </style> -->
+    <style>
+       /* Profile Settings Page CSS */
+
+:root {
+    --primary: #4F46E5;
+    --secondary: #7C3AED;
+    --accent: #06B6D4;
+    --main-bg: #1a2332;
+    --sidebar-bg: #0D1117;
+    --card-bg: #243447;
+    --card-hover: #2D3A5F;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --gradient-primary: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #06B6D4 100%);
+    --glow-blue: rgba(79, 70, 229, 0.4);
+    --glow-purple: rgba(124, 58, 237, 0.4);
+    --success: #10B981;
+    --danger: #EF4444;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--main-bg);
+    color: var(--text-primary);
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+
+
+/* === SIDEBAR (Same as Dashboard) === */
+.sidebar {
+  width: 250px;
+  min-width: 250px;
+  max-width: 250px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid rgba(79, 70, 229, 0.2);
+  padding: 1.5rem 1.2rem 1rem;
+  position: fixed;
+  left: 0;
+  top: 0;
+
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 5px 0 30px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  animation: slideInLeft 0.5s ease-out;
+  
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.sidebar .logo {
+  font-size: 1.85rem;
+  font-weight: 900;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  letter-spacing: -0.5px;
+  filter: drop-shadow(0 0 15px var(--glow-blue));
+  animation: pulse 3s ease-in-out infinite;
+  padding: 0.4rem 0;
+}
+
+@keyframes pulse {
+  0%, 100% { filter: drop-shadow(0 0 15px var(--glow-blue)); }
+  50% { filter: drop-shadow(0 0 25px var(--glow-purple)); }
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.sidebar nav a {
+  padding: 0.85rem 1.1rem;
+  background: transparent;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: 11px;
+  font-weight: 600;
+  font-size: 0.93rem;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar nav a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-primary);
+  opacity: 0.1;
+  transition: left 0.4s ease;
+  z-index: 0;
+}
+
+.sidebar nav a:hover::before {
+  left: 0;
+}
+
+.sidebar nav a:hover {
+  color: var(--text-primary);
+  background: rgba(36, 52, 71, 0.5);
+  border-color: rgba(79, 70, 229, 0.3);
+  transform: translateX(5px);
+}
+
+.profile-card {
+  background: rgba(36, 52, 71, 0.6);
+  padding: 1.2rem 1rem;
+  border-radius: 14px;
+  text-align: center;
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  margin-top: auto;
+  transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+  border-color: rgba(79, 70, 229, 0.5);
+  box-shadow: 0 10px 40px rgba(79, 70, 229, 0.3);
+  transform: translateY(-5px);
+}
+
+.profile-card img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  background: var(--gradient-primary);
+  padding: 3px;
+  margin-bottom: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.profile-card:hover img {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 0 30px var(--glow-blue);
+}
+
+.profile-card p {
+  color: var(--text-secondary);
+  font-size: 0.83rem;
+  margin-bottom: 0.4rem;
+  line-height: 1.35;
+  word-wrap: break-word;
+}
+
+.profile-card p strong {
+  color: var(--text-primary);
+  font-size: 1.02rem;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.profile-actions a {
+  padding: 0.68rem 0.8rem;
+  background: var(--gradient-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 20px rgba(79, 70, 229, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.profile-actions a:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(79, 70, 229, 0.5);
+}
+
+.profile-actions a:last-child {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  box-shadow: 0 5px 20px rgba(239, 68, 68, 0.3);
+}
+
+.profile-actions a:last-child:hover {
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5);
+}
+
+/* === MAIN CONTENT === */
+.main-content {
+  flex: 1;
+  margin-left: 270px;
+  padding: 2.5rem 3rem;
+  animation: fadeIn 0.6s ease-out;
+  min-height: 100vh;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.main-content h1 {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 1.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* === MESSAGES === */
+.messages {
+    margin-bottom: 1.5rem;
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.messages p {
+    padding: 0.8rem 1.2rem;
+    background: var(--card-bg);
+    border-radius: 10px;
+    margin-bottom: 0.8rem;
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    font-size: 0.9rem;
+}
+
+.messages .success {
+    border-left: 4px solid var(--success);
+    color: var(--success);
+}
+
+.messages .error {
+    border-left: 4px solid var(--danger);
+    color: var(--danger);
+}
+
+/* === PROFILE FORM === */
+.profile-form {
+    max-width: 650px;
+    background: var(--card-bg);
+    padding: 1.8rem;
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    animation: zoomIn 0.6s ease-out backwards;
+    transition: all 0.3s ease;
+}
+
+.profile-form:nth-of-type(3) {
+    animation-delay: 0.2s;
+}
+
+.profile-form:nth-of-type(4) {
+    animation-delay: 0.4s;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.profile-form:hover {
+    transform: translateY(-3px);
+    border-color: rgba(79, 70, 229, 0.4);
+    box-shadow: 0 12px 40px rgba(79, 70, 229, 0.25);
+}
+
+.profile-form h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 1.2rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.profile-form form p {
+    margin-bottom: 1rem;
+}
+
+.profile-form label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.profile-form input,
+.profile-form textarea,
+.profile-form select {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    background: var(--main-bg);
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.profile-form input::placeholder,
+.profile-form textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.profile-form input:focus,
+.profile-form textarea:focus,
+.profile-form select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 12px rgba(79, 70, 229, 0.3);
+    background: var(--card-hover);
+}
+
+.profile-form input[type="file"] {
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+}
+
+.profile-form input[type="file"]::file-selector-button {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 0.8rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.profile-form input[type="file"]::file-selector-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+.profile-form button {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.5rem;
+}
+
+.profile-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.6);
+}
+
+.profile-form button:active {
+    transform: translateY(0);
+}
+
+/* === SCROLLBAR === */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: var(--sidebar-bg);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--main-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: 10px;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 220px;
+        min-width: 220px;
+        max-width: 220px;
+    }
+
+    .main-content {
+        margin-left: 220px;
+        padding: 1.8rem 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid rgba(79, 70, 229, 0.2);
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+    }
+
+    .main-content h1 {
+        font-size: 1.7rem;
+    }
+
+    .profile-form {
+        padding: 1.5rem;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .profile-form h2 {
+        font-size: 1.2rem;
+    }
+
+    .profile-form {
+        padding: 1.2rem;
+    }
+}
+
+::selection {
+    background: rgba(79, 70, 229, 0.3);
+    color: var(--text-primary);
+}
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="logo">BookWise</div>
+        <nav>
+            <a href="{% url 'recommender:dashboard' %}" class="active">Dashboard</a>
+            <a href="{% url 'recommender:browse_books' %}">Browse</a>
+            <a href="{% url 'recommender:recommendations' %}">Recommendations</a>
+        </nav>
+       
+         <div class="profile-card">
+        {% if user.profile.image %}
+            <img src="{{ user.profile.image.url }}" alt="Profile Picture">
+        {% else %}
+            <img src="{% static 'img/profile.jpg' %}" alt="Profile Picture">
+        {% endif %}
+        <p><strong>{{ user.username }}</strong></p>
+        <p style="word-wrap:break-word;">{{ user.email }}</p>
+        <p>Read: {{ books_read|default:0 }} | Favorites: {{ favorites_count|default:0 }}</p>
+        <div class="profile-actions">
+            <a href="{% url 'accounts:profile' %}">Profile Settings</a>
+            <a href="{% url 'accounts:logout' %}">Logout</a>
+        </div>
+    </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <h1>Profile Settings</h1>
+
+        <div class="messages">
+            {% for message in messages %}
+                <p class="{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+
+        <!-- Update profile -->
+        <div class="profile-form">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ user_form.as_p }}
+                {{ profile_form.as_p }}
+                <button type="submit" name="update_profile">Update Profile</button>
+            </form>
+        </div>
+
+        <!-- Change password -->
+        <div class="profile-form">
+            <h2>Change Password</h2>
+            <form method="POST">
+                {% csrf_token %}
+                {{ password_form.as_p }}
+                <button type="submit" name="change_password">Change Password</button>
+            </form>
+        </div>
+
+    </main>
+
+</div>w
+</body>
+</html>

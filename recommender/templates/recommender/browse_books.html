@@ -1,0 +1,408 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Browse Books | BookWise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4F46E5; --secondary: #7C3AED; --accent: #06B6D4;
+            --main-bg: #1a2332; --sidebar-bg: #0D1117; --card-bg: #243447; --card-hover: #2D3A5F;
+            --text-primary: #F8FAFC; --text-secondary: #94A3B8; --text-muted: #64748B;
+            --gradient-primary: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #06B6D4 100%);
+            --glow-blue: rgba(79,70,229,0.4); --glow-purple: rgba(124,58,237,0.4);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--main-bg); color: var(--text-primary); display: flex; min-height: 100vh; overflow-x: hidden; }
+        .sidebar { width: 250px; min-width: 250px; max-width: 250px; background: var(--sidebar-bg); border-right: 1px solid rgba(79,70,229,0.2); padding: 1.5rem 1.2rem 1rem; position: fixed; left: 0; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; box-shadow: 5px 0 30px rgba(0,0,0,0.4); z-index: 100; }
+        .sidebar .logo { font-size: 1.85rem; font-weight: 900; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; letter-spacing: -0.5px; filter: drop-shadow(0 0 15px var(--glow-blue)); padding: 0.4rem 0; animation: pulse 3s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { filter: drop-shadow(0 0 15px var(--glow-blue)); } 50% { filter: drop-shadow(0 0 25px var(--glow-purple)); } }
+        .sidebar nav { display: flex; flex-direction: column; gap: 0.65rem; }
+        .sidebar nav a { padding: 0.85rem 1.1rem; background: transparent; color: var(--text-secondary); text-decoration: none; border-radius: 11px; font-weight: 600; font-size: 0.93rem; transition: all 0.3s ease; border: 1px solid transparent; position: relative; overflow: hidden; }
+        .sidebar nav a::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: var(--gradient-primary); opacity: 0.1; transition: left 0.4s ease; z-index: 0; }
+        .sidebar nav a:hover::before { left: 0; }
+        .sidebar nav a:hover { color: var(--text-primary); background: rgba(36,52,71,0.5); border-color: rgba(79,70,229,0.3); transform: translateX(5px); }
+        .sidebar nav a.active { background: var(--gradient-primary); color: white; border-color: transparent; box-shadow: 0 5px 20px rgba(79,70,229,0.4); }
+        .profile-card { background: rgba(36,52,71,0.6); padding: 1.2rem 1rem; border-radius: 14px; text-align: center; border: 1px solid rgba(79,70,229,0.2); margin-top: auto; transition: all 0.3s ease; }
+        .profile-card:hover { border-color: rgba(79,70,229,0.5); box-shadow: 0 10px 40px rgba(79,70,229,0.3); transform: translateY(-5px); }
+        .profile-card img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid transparent; background: var(--gradient-primary); padding: 3px; margin-bottom: 0.8rem; transition: all 0.3s ease; }
+        .profile-card:hover img { transform: scale(1.1) rotate(5deg); box-shadow: 0 0 30px var(--glow-blue); }
+        .profile-card p { color: var(--text-secondary); font-size: 0.83rem; margin-bottom: 0.4rem; line-height: 1.35; word-wrap: break-word; }
+        .profile-card p strong { color: var(--text-primary); font-size: 1.02rem; display: block; margin-bottom: 0.4rem; }
+        .profile-actions { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.85rem; }
+        .profile-actions a { padding: 0.68rem 0.8rem; background: var(--gradient-primary); color: white; text-decoration: none; border-radius: 9px; font-weight: 600; font-size: 0.8rem; transition: all 0.3s ease; box-shadow: 0 5px 20px rgba(79,70,229,0.3); text-transform: uppercase; letter-spacing: 0.4px; }
+        .profile-actions a:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(79,70,229,0.5); }
+        .profile-actions a:last-child { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); box-shadow: 0 5px 20px rgba(239,68,68,0.3); }
+        .main-content { flex: 1; margin-left: 250px; padding: 0; min-height: 100vh; }
+        .top-navbar { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 1.5rem; border-bottom: 1px solid rgba(79,70,229,0.15); position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); background: rgba(26,35,50,0.95); height: 60px; }
+        .top-navbar .title { font-size: 1.5rem; font-weight: 900; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.5px; }
+        .nav-search { flex: 0 0 320px; max-width: 320px; margin-left: auto; }
+        .nav-search input { width: 100%; padding: 0.6rem 1rem; background: var(--card-bg); border: 1px solid rgba(79,70,229,0.2); border-radius: 20px; color: var(--text-primary); font-size: 0.85rem; outline: none; transition: all 0.3s ease; height: 38px; }
+        .nav-search input::placeholder { color: var(--text-muted); }
+        .nav-search input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(79,70,229,0.3); background: var(--card-hover); }
+        .content-body { padding: 0 3rem; }
+        .filter-bar { display: flex; align-items: center; gap: 0.75rem; margin-top: 1.8rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+        .filter-btn { padding: 0.45rem 1.1rem; border-radius: 20px; border: 1px solid rgba(79,70,229,0.3); background: transparent; color: var(--text-secondary); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.25s ease; white-space: nowrap; }
+        .filter-btn:hover, .filter-btn.active { background: var(--gradient-primary); color: white; border-color: transparent; box-shadow: 0 4px 14px rgba(79,70,229,0.35); }
+        .results-count { margin-left: auto; font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+        .results-count span { color: var(--accent); font-weight: 700; }
+        .search-strip { display: none; align-items: center; gap: 0.6rem; margin-bottom: 1.2rem; padding: 0.65rem 1.2rem; background: rgba(79,70,229,0.1); border: 1px solid rgba(79,70,229,0.25); border-radius: 10px; font-size: 0.85rem; color: var(--text-secondary); }
+        .search-strip.visible { display: flex; }
+        .search-strip strong { color: var(--accent); }
+        .clear-search { margin-left: auto; cursor: pointer; color: var(--text-muted); font-size: 0.8rem; background: none; border: none; transition: color 0.2s; }
+        .clear-search:hover { color: #EF4444; }
+        .section-title { font-size: 1.7rem; font-weight: 800; margin-bottom: 1.5rem; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.5px; position: relative; padding-left: 1.2rem; }
+        .section-title::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 5px; height: 70%; background: var(--gradient-primary); border-radius: 10px; box-shadow: 0 0 15px var(--glow-blue); }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .book-card { background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid rgba(79,70,229,0.2); transition: all 0.4s cubic-bezier(0.4,0,0.2,1); cursor: pointer; position: relative; display: flex; flex-direction: column; animation: cardIn 0.45s ease-out backwards; }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .book-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--gradient-primary); opacity: 0; transition: opacity 0.4s ease; z-index: 0; }
+        .book-card:hover::before { opacity: 0.1; }
+        .book-card:hover { transform: translateY(-10px) scale(1.02); border-color: rgba(79,70,229,0.6); box-shadow: 0 20px 60px rgba(79,70,229,0.4), 0 0 50px rgba(124,58,237,0.3); }
+        .book-card img { width: 100%; height: 300px; object-fit: cover; object-position: center; border-bottom: 1px solid rgba(79,70,229,0.2); transition: all 0.3s ease; position: relative; z-index: 1; }
+        .book-card:hover img { transform: scale(1.05); }
+        .book-info { padding: 1.2rem; flex: 1; display: flex; flex-direction: column; gap: 0.45rem; position: relative; z-index: 1; }
+        .book-info .title { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; min-height: 2.6em; }
+        .book-info .author { font-size: 0.88rem; color: var(--text-secondary); }
+        .book-info .rating { font-size: 0.82rem; color: var(--accent); font-weight: 600; }
+        .pop-bar-wrap { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+        .pop-bar { flex: 1; height: 4px; border-radius: 10px; background: rgba(255,255,255,0.08); overflow: hidden; }
+        .pop-bar-fill { height: 100%; border-radius: 10px; background: var(--gradient-primary); }
+        .pop-label { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; }
+        .btn-row { display: flex; gap: 8px; margin-top: auto; width: 100%; }
+        .read-btn, .detail-btn { flex: 1; padding: 8px 10px; border: none; border-radius: 6px; font-weight: 600; font-size: 0.75rem; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: var(--gradient-primary); color: white; box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
+        .read-btn:hover, .detail-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79,70,229,0.5); }
+        .badge { display: inline-block; padding: 0.3rem 0.7rem; background: rgba(239,68,68,0.2); color: #EF4444; border-radius: 20px; font-size: 0.7rem; font-weight: 600; border: 1px solid rgba(239,68,68,0.3); width: fit-content; }
+        #loadingIndicator { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 2.5rem 0; }
+        #loadingIndicator.active { display: flex; }
+        .spinner { width: 44px; height: 44px; border-radius: 50%; border: 3px solid rgba(79,70,229,0.2); border-top-color: #4F46E5; animation: spin 0.75s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #loadingIndicator p { font-size: 0.88rem; color: var(--text-muted); font-weight: 500; }
+        #endMessage { display: none; text-align: center; padding: 1.5rem 0 3rem; }
+        #endMessage.visible { display: block; }
+        #endMessage span { display: inline-block; padding: 0.5rem 1.4rem; border: 1px solid rgba(79,70,229,0.25); border-radius: 20px; color: var(--text-muted); font-size: 0.88rem; }
+        #emptyState { display: none; text-align: center; padding: 4rem 2rem; background: var(--card-bg); border-radius: 20px; border: 1px solid rgba(79,70,229,0.2); position: relative; overflow: hidden; margin-bottom: 3rem; }
+        #emptyState.visible { display: block; }
+        #emptyState p { font-size: 1.1rem; color: var(--text-secondary); font-weight: 600; }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-track { background: var(--sidebar-bg); }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--gradient-primary); border-radius: 10px; }
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--main-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--gradient-primary); border-radius: 10px; }
+        @media (max-width: 1024px) { .sidebar { width: 220px; min-width: 220px; max-width: 220px; } .main-content { margin-left: 220px; } .content-body { padding: 0 2rem; } .cards-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
+        @media (max-width: 768px) { .sidebar { width: 100%; max-width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid rgba(79,70,229,0.2); } .main-content { margin-left: 0; } .top-navbar { flex-direction: column; gap: 0.8rem; padding: 0.8rem 1.5rem; height: auto; } .nav-search { margin-left: 0; max-width: 100%; flex: 1; } .content-body { padding: 0 1.5rem; } .cards-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
+        @media (max-width: 480px) { .cards-grid { grid-template-columns: 1fr; } }
+        ::selection { background: rgba(79,70,229,0.3); color: var(--text-primary); }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="logo">📚 BookWise</div>
+    <nav>
+        <a href="{% url 'recommender:dashboard' %}">Dashboard</a>
+        <a href="{% url 'recommender:browse_books' %}" class="active">Browse</a>
+        <a href="{% url 'recommender:recommendations' %}">Recommendations</a>
+    </nav>
+    <div class="profile-card">
+        {% if user.profile.image %}<img src="{{ user.profile.image.url }}" alt="Profile">
+        {% else %}<img src="{% static 'img/profile.jpg' %}" alt="Profile">{% endif %}
+        <p><strong>{{ user.username }}</strong></p>
+        <p style="word-wrap:break-word;">{{ user.email }}</p>
+        <p>Read: {{ books_read|default:0 }} | Favorites: {{ favorites_count|default:0 }}</p>
+        <div class="profile-actions">
+            <a href="{% url 'accounts:profile' %}">Profile Settings</a>
+            <a href="{% url 'accounts:logout' %}">Logout</a>
+        </div>
+    </div>
+</aside>
+
+<div class="main-content">
+    <div class="top-navbar">
+        <div class="title">Browse Books</div>
+        <div class="nav-search">
+            <input type="text" id="mainSearch" placeholder="🔍 Search title, author, description..." autocomplete="off" value="{{ query|default:'' }}">
+        </div>
+    </div>
+
+    <div class="content-body">
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="setSort('rating',this)">⭐ Top Rated</button>
+            <button class="filter-btn"        onclick="setSort('popular',this)">🔥 Most Read</button>
+            <button class="filter-btn"        onclick="setSort('title',this)">🔤 A–Z Title</button>
+            <button class="filter-btn"        onclick="setSort('author',this)">✍️ A–Z Author</button>
+            <div class="results-count">Showing <span id="visibleCount">{{ books|length }}</span> books</div>
+        </div>
+
+        <div class="search-strip {% if query %}visible{% endif %}" id="searchStrip">
+            🔍 Results for <strong id="searchTermDisplay">{% if query %}"{{ query }}"{% endif %}</strong>
+            <button class="clear-search" onclick="clearSearch()">✕ Clear</button>
+        </div>
+
+        <div class="section-title" id="sectionTitle">{% if query %}Results for "{{ query }}"{% else %}All Books{% endif %}</div>
+
+        <div class="cards-grid" id="booksGrid">
+            {% for book in books %}
+            <div class="book-card"
+                 data-title="{{ book.title|lower }}"
+                 data-author="{{ book.author|lower }}"
+                 data-ratings="{{ book.num_ratings }}"
+                 data-rating-val="{{ book.avg_rating_raw|default:0 }}">
+                <img src="{{ book.cover_url }}" alt="{{ book.title }}" loading="lazy" onerror="this.src='{% static 'images/default_cover.jpg' %}'">
+                <div class="book-info">
+                    <p class="title">{{ book.title }}</p>
+                    <p class="author">✍️ {{ book.author }}</p>
+                    <p class="rating">
+                        {% if book.num_ratings > 0 %}⭐ {{ book.avg_rating }} <span style="color:var(--text-muted);font-weight:400;">({{ book.num_ratings }})</span>
+                        {% else %}<span style="color:var(--text-muted);">No ratings yet</span>{% endif %}
+                    </p>
+                    <div class="pop-bar-wrap">
+                        <div class="pop-bar"><div class="pop-bar-fill" style="width:{{ book.popularity_pct|default:0 }}%"></div></div>
+                        <span class="pop-label">{{ book.num_reads|default:0 }} reads</span>
+                        {% comment %} <span class="pop-label">{{ book.num_ratings }} reads</span> {% endcomment %}
+                    </div>
+                    <div class="btn-row">
+                        {% if book.file_path %}<button class="read-btn" onclick="window.location.href='{% url 'recommender:read_book' book.id %}'">📖 Read</button>{% endif %}
+                        <button class="detail-btn" onclick="window.location.href='{% url 'recommender:book_detail' book.id %}'">ℹ️ Details</button>
+                    </div>
+                    {% if not book.file_path %}<span class="badge">No Content</span>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>Loading more books…</p>
+        </div>
+
+        <div id="endMessage"><span>✅ You've seen all the books!</span></div>
+        <div id="emptyState"><p>No books match your search 🔍 Try a different keyword!</p></div>
+    </div>
+</div>
+
+<script>
+/* ── Config from Django ─────────────────────────────── */
+const BROWSE_URL = "{% url 'recommender:browse_books' %}";
+
+/* ── State ──────────────────────────────────────────── */
+let nextPage     = {{ next_page|default:2 }};
+let hasNext      = {{ has_next|yesno:"true,false" }};
+let isFetching   = false;
+let currentSort  = 'rating';
+let currentQuery = "{{ query|default:''|escapejs }}";
+let debounceTimer = null;
+
+/* ── DOM ────────────────────────────────────────────── */
+const grid      = document.getElementById('booksGrid');
+const loader    = document.getElementById('loadingIndicator');
+const endMsg    = document.getElementById('endMessage');
+const emptyEl   = document.getElementById('emptyState');
+const countEl   = document.getElementById('visibleCount');
+const strip     = document.getElementById('searchStrip');
+const stripTerm = document.getElementById('searchTermDisplay');
+const titleEl   = document.getElementById('sectionTitle');
+const searchInp = document.getElementById('mainSearch');
+
+/* Show end-message if first page is already everything */
+if (!hasNext && grid.querySelectorAll('.book-card').length > 0) {
+    endMsg.classList.add('visible');
+}
+
+/* ── Search (debounced) ─────────────────────────────── */
+searchInp.addEventListener('input', function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        currentQuery = this.value.trim();
+        resetAndFetch();
+    }, 350);
+});
+
+/* ── Sort buttons ───────────────────────────────────── */
+const SORT_LABELS = { rating:'All Books', popular:'Most Read', title:'A–Z by Title', author:'A–Z by Author' };
+
+function setSort(sort, btn) {
+    currentSort = sort;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (!hasNext) {
+        sortCardsInDom();
+        updateHeading();
+    } else {
+        resetAndFetch();
+    }
+}
+
+function sortCardsInDom() {
+    const cards = Array.from(grid.querySelectorAll('.book-card'));
+    cards.sort((a, b) => {
+        if (currentSort === 'title')   return a.dataset.title.localeCompare(b.dataset.title);
+        if (currentSort === 'author')  return a.dataset.author.localeCompare(b.dataset.author);
+        if (currentSort === 'popular') return +b.dataset.ratings - +a.dataset.ratings;
+        return parseFloat(b.dataset.ratingVal) - parseFloat(a.dataset.ratingVal);
+    });
+    cards.forEach(c => grid.appendChild(c));
+}
+
+function updateHeading() {
+    titleEl.textContent = currentQuery ? `Results for "${currentQuery}"` : (SORT_LABELS[currentSort] || 'All Books');
+}
+
+function clearSearch() {
+    searchInp.value = '';
+    currentQuery = '';
+    resetAndFetch();
+}
+
+/* ── Reset: wipe grid, restart from page 1 ─────────── */
+function resetAndFetch() {
+    nextPage   = 1;
+    hasNext    = true;
+    isFetching = false;    /* ← release stuck lock */
+    grid.innerHTML = '';
+    grid.style.display = 'grid';
+    endMsg.classList.remove('visible');
+    emptyEl.classList.remove('visible');
+    countEl.textContent = 0;
+    fetchPage();
+}
+/* ── Fetch one page via AJAX ────────────────────────── */
+function fetchPage() {
+    if (isFetching || !hasNext) return;
+
+    isFetching = true;
+    loader.classList.add('active');
+
+    const params = new URLSearchParams({ page: nextPage, q: currentQuery });
+
+    fetch(BROWSE_URL + '?' + params, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+    })
+    .then(data => {
+        isFetching = false;
+        loader.classList.remove('active');
+
+        const books = data.books || [];
+        if (books.length > 0) {
+            appendCards(books);
+            nextPage += 1;
+        }
+
+        hasNext = (data.has_next === true);
+
+        if (currentSort !== 'rating' && books.length > 0) sortCardsInDom();
+
+        const total = grid.querySelectorAll('.book-card').length;
+        countEl.textContent = total;
+
+        if (total === 0) {
+            grid.style.display = 'none';
+            emptyEl.classList.add('visible');
+        } else {
+            grid.style.display = 'grid';
+            emptyEl.classList.remove('visible');
+        }
+
+        if (!hasNext && total > 0) endMsg.classList.add('visible');
+        else endMsg.classList.remove('visible');
+
+        if (currentQuery) {
+            strip.classList.add('visible');
+            stripTerm.textContent = '"' + currentQuery + '"';
+        } else {
+            strip.classList.remove('visible');
+        }
+
+        updateHeading();
+    })
+    .catch(err => {
+        isFetching = false;
+        loader.classList.remove('active');
+        console.error('Browse fetch error:', err);
+    });
+}
+
+/* ── Infinite scroll ─────────────────────────────── */
+window.addEventListener('scroll', () => {
+    if (!hasNext || isFetching) return;
+
+    const scrollBottom = window.innerHeight + window.scrollY;
+    const gridBottom   = grid.offsetTop + grid.offsetHeight;
+
+    // Trigger load when user scrolls near bottom of grid
+    if (scrollBottom + 150 >= gridBottom) {
+        fetchPage();
+    }
+});
+
+/* ── Optional: auto-load if first page is short ──── */
+if (grid.getBoundingClientRect().bottom < window.innerHeight) {
+    fetchPage();
+}
+/* ── Build card HTML from JSON ──────────────────────── */
+function buildCard(book, delay) {
+    var cover     = book.cover_url || '/static/images/default_cover.jpg';
+    var ratingHTML = book.num_ratings > 0
+        ? '⭐ ' + book.avg_rating + ' <span style="color:var(--text-muted);font-weight:400;">(' + book.num_ratings + ')</span>'
+        : '<span style="color:var(--text-muted);">No ratings yet</span>';
+    var readBtn = book.file_path
+        ? '<button class="read-btn" onclick="window.location.href=\'' + book.read_url + '\'">📖 Read</button>'
+        : '';
+    var badge = !book.file_path ? '<span class="badge">No Content</span>' : '';
+
+    var card = document.createElement('div');
+    card.className = 'book-card';
+    card.dataset.title     = (book.title  || '').toLowerCase();
+    card.dataset.author    = (book.author || '').toLowerCase();
+    card.dataset.ratings   = book.num_ratings;
+    card.dataset.ratingVal = book.avg_rating_raw;
+    card.style.animationDelay = (delay * 40) + 'ms';
+
+    card.innerHTML =
+        '<img src="' + esc(cover) + '" alt="' + esc(book.title) + '" loading="lazy" onerror="this.src=\'/static/images/default_cover.jpg\'">' +
+        '<div class="book-info">' +
+            '<p class="title">'  + esc(book.title)  + '</p>' +
+            '<p class="author">✍️ ' + esc(book.author) + '</p>' +
+            '<p class="rating">' + ratingHTML + '</p>' +
+            '<div class="pop-bar-wrap">' +
+                '<div class="pop-bar"><div class="pop-bar-fill" style="width:' + (book.popularity_pct||0) + '%"></div></div>' +
+                '<span class="pop-label">' + book.num_ratings + ' reads</span>' +
+            '</div>' +
+            '<div class="btn-row">' + readBtn +
+                '<button class="detail-btn" onclick="window.location.href=\'' + book.detail_url + '\'">ℹ️ Details</button>' +
+            '</div>' +
+            badge +
+        '</div>';
+
+    return card;
+}
+
+function appendCards(books) {
+    var frag = document.createDocumentFragment();
+    books.forEach(function(book, i) { frag.appendChild(buildCard(book, i)); });
+    grid.appendChild(frag);
+}
+
+function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── IntersectionObserver on the spinner ────────────── *
+ *  Watches #loadingIndicator (always in DOM).           *
+ *  rootMargin: 500px below viewport → fires early       *
+ * ─────────────────────────────────────────────────────  */
+var observer = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting) {
+        console.log('Spinner visible → fetchPage called');
+        fetchPage();
+    }
+}, { rootMargin: '0px 0px 500px 0px' });
+observer.observe(loader);
+</script>
+</body>
+</html>

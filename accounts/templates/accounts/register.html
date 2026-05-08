@@ -1,0 +1,649 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register | BookWise</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <!-- CSS -->
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}" />
+  <style>
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+
+    :root {
+      --primary: #4F46E5;
+      --primary-light: #6366F1;
+      --secondary: #7C3AED;
+      --accent: #06B6D4;
+      --main-bg: #1a2332;
+      --card-bg: #243447;
+      --card-hover: #2D3A5F;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --gradient-primary: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #06B6D4 100%);
+      --glow-blue: rgba(79, 70, 229, 0.4);
+      --glow-purple: rgba(124, 58, 237, 0.4);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--main-bg);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    html { 
+      scroll-behavior: smooth; 
+    }
+
+    /* === NAVBAR === */
+    header {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      backdrop-filter: blur(20px) saturate(180%);
+      background: rgba(26, 35, 50, 0.85);
+      border-bottom: 1px solid rgba(79, 70, 229, 0.2);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    nav {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 3rem;
+    }
+
+    nav .logo {
+      font-size: 1.75rem;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      filter: drop-shadow(0 0 10px var(--glow-blue));
+    }
+
+    nav ul {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+      align-items: center;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.95rem;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    nav a:hover,
+    nav a.active {
+      color: var(--text-primary);
+      text-shadow: 0 0 10px var(--glow-blue);
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      left: 50%;
+      bottom: -8px;
+      background: var(--gradient-primary);
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+      box-shadow: 0 0 10px var(--glow-blue);
+    }
+
+    nav a:hover::after,
+    nav a.active::after { 
+      width: 100%; 
+    }
+
+    /* === MAIN === */
+    main {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 8rem 1rem 3rem;
+      min-height: 100vh;
+      background: var(--main-bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    main::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 30% 40%, rgba(79, 70, 229, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 70%, rgba(124, 58, 237, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 90%, rgba(6, 182, 212, 0.12) 0%, transparent 50%);
+      z-index: 0;
+    }
+
+    /* === REGISTER CONTAINER === */
+    .register-container {
+      background: var(--card-bg);
+      padding: 2.5rem 2rem;
+      border-radius: 20px;
+      border: 1px solid rgba(79, 70, 229, 0.3);
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 50px rgba(79, 70, 229, 0.2);
+      width: 100%;
+      max-width: 440px;
+      margin: auto;
+      animation: fadeInUp 0.8s ease forwards;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .register-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+      background-size: 200% 100%;
+      animation: gradientShift 3s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 0%; }
+      50% { background-position: 100% 0%; }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* === HEADINGS === */
+    h2 {
+      color: var(--text-primary);
+      margin-bottom: 1.8rem;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.85rem;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px var(--glow-blue));
+      letter-spacing: -0.02em;
+    }
+
+    /* === FORMS === */
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+      display: block;
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.2rem;
+      border: 2px solid rgba(79, 70, 229, 0.3);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      background: rgba(26, 35, 50, 0.5);
+      transition: all 0.3s ease;
+      position: relative;
+      cursor: text;
+    }
+
+    .form-group::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      padding: 2px;
+      background: var(--gradient-primary);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .form-group:focus-within {
+      border-color: transparent;
+      background: rgba(79, 70, 229, 0.1);
+      box-shadow: 
+        0 0 0 3px rgba(79, 70, 229, 0.2),
+        0 8px 16px rgba(0, 0, 0, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .form-group:focus-within::before {
+      opacity: 1;
+    }
+
+    .form-group svg {
+      margin-right: 0.75rem;
+      fill: var(--accent);
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .form-group:focus-within svg {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 8px var(--accent));
+    }
+
+    .form-group input {
+      border: none;
+      outline: none;
+      width: 100%;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-primary);
+      background: transparent;
+      pointer-events: auto;
+    }
+
+    .form-group input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-group:focus-within input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    /* === BUTTON === */
+    button {
+      background: var(--gradient-primary);
+      color: white;
+      padding: 1rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      box-shadow: 
+        0 10px 35px rgba(79, 70, 229, 0.5),
+        0 0 50px rgba(124, 58, 237, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      margin-top: 0.5rem;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s ease;
+      pointer-events: none;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 
+        0 15px 45px rgba(79, 70, 229, 0.6),
+        0 0 70px rgba(124, 58, 237, 0.5);
+    }
+
+    button:active {
+      transform: translateY(-1px);
+    }
+
+    /* === TEXT CENTER === */
+    .text-center {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .text-center a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .text-center a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .text-center a:hover {
+      color: var(--primary-light);
+      text-shadow: 0 0 10px var(--glow-blue);
+    }
+
+    .text-center a:hover::after {
+      width: 100%;
+    }
+
+    /* === ERROR LIST === */
+    .errorlist {
+      color: #ff6b6b;
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(220, 53, 69, 0.2) 100%);
+      border: 1px solid rgba(255, 107, 107, 0.4);
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      margin-bottom: 0.8rem;
+      font-size: 0.85rem;
+      list-style: none;
+      animation: shake 0.5s ease;
+    }
+
+    .errorlist li {
+      margin-bottom: 0.3rem;
+    }
+
+    .errorlist li:last-child {
+      margin-bottom: 0;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+      20%, 40%, 60%, 80% { transform: translateX(3px); }
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 900px) {
+      nav {
+        padding: 1rem 2rem;
+      }
+
+      nav ul {
+        gap: 1.5rem;
+      }
+
+      .register-container {
+        padding: 2rem 1.5rem;
+        max-width: 90%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav .logo {
+        font-size: 1.5rem;
+      }
+
+      nav ul {
+        gap: 1.2rem;
+        font-size: 0.85rem;
+      }
+
+      main {
+        padding: 7rem 1rem 2rem;
+      }
+
+      h2 {
+        font-size: 1.6rem;
+      }
+
+      .register-container {
+        padding: 1.8rem 1.2rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      nav {
+        padding: 0.9rem 1.5rem;
+      }
+
+      nav .logo {
+        font-size: 1.3rem;
+      }
+
+      nav ul {
+        gap: 1rem;
+        font-size: 0.8rem;
+      }
+
+      main {
+        padding: 6rem 1rem 2rem;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+      }
+
+      button {
+        padding: 0.9rem;
+        font-size: 1rem;
+      }
+
+      .form-group {
+        padding: 0.65rem 0.85rem;
+      }
+
+      .register-container {
+        max-width: 95%;
+      }
+    }
+
+    /* === FOCUS STYLES === */
+    button:focus-visible,
+    input:focus-visible,
+    a:focus-visible {
+      outline: 3px solid var(--primary);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="logo">📚 BookWise</div>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/login/">Login</a></li>
+      <li><a href="/register/" class="active">Register</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- <main>
+  <div class="register-container">
+    <h2>Create Your BookWise Account</h2>
+    
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <label for="{{ form.username.id_for_label }}">Username</label>
+      {{ form.username.errors }}
+      <div class="form-group">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+        </svg>
+        <input type="text" name="username" id="{{ form.username.id_for_label }}" placeholder="Choose a username" required autocomplete="username" {% if form.username.value %}value="{{ form.username.value }}"{% endif %}>
+      </div>
+
+      <label for="{{ form.email.id_for_label }}">Email</label>
+      {{ form.email.errors }}
+      <div class="form-group">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path d="M12 13.5L2 6.75V18h20V6.75L12 13.5zm0-2.25L22 6H2l10 5.25z"/>
+        </svg>
+        <input type="email" name="email" id="{{ form.email.id_for_label }}" placeholder="Enter your email" required autocomplete="email" {% if form.email.value %}value="{{ form.email.value }}"{% endif %}>
+      </div>
+
+      <label for="{{ form.password1.id_for_label }}">Password</label>
+      {{ form.password1.errors }}
+      <div class="form-group">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6z"/>
+        </svg>
+        <input type="password" name="password1" id="{{ form.password1.id_for_label }}" placeholder="Create a password" required autocomplete="new-password">
+      </div>
+
+      <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+      {{ form.password2.errors }}
+      <div class="form-group">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6z"/>
+        </svg>
+        <input type="password" name="password2" id="{{ form.password2.id_for_label }}" placeholder="Confirm your password" required autocomplete="new-password">
+      </div>
+
+      <button type="submit">Register</button>
+    </form>
+    
+    <p class="text-center">
+      Already have an account? <a href="/login/">Login here</a>
+    </p>
+  </div>
+</main>
+
+</body>
+</html> -->
+
+<main>
+  <div class="register-container">
+    <h2>Create Your BookWise Account</h2>
+    
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <!-- First Name -->
+      <label for="{{ form.first_name.id_for_label }}">First Name</label>
+      {{ form.first_name.errors }}
+      <div class="form-group">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM12 14c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+        </svg>
+        <input type="text" name="first_name" id="{{ form.first_name.id_for_label }}" placeholder="Enter your first name" required value="{{ form.first_name.value|default_if_none:'' }}">
+      </div>
+
+      <!-- Last Name -->
+      <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+      {{ form.last_name.errors }}
+      <div class="form-group">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM12 14c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+        </svg>
+        <input type="text" name="last_name" id="{{ form.last_name.id_for_label }}" placeholder="Enter your last name" required value="{{ form.last_name.value|default_if_none:'' }}">
+      </div>
+      <!-- Username -->
+      <label for="{{ form.username.id_for_label }}">Username</label>
+      {{ form.username.errors }}
+      <div class="form-group">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+        </svg>
+        <input type="text" name="username" id="{{ form.username.id_for_label }}" placeholder="Choose a username" required autocomplete="username" value="{{ form.username.value|default_if_none:'' }}">
+      </div>
+
+      
+
+      <!-- Email -->
+      <label for="{{ form.email.id_for_label }}">Email</label>
+      {{ form.email.errors }}
+      <div class="form-group">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path d="M12 13.5L2 6.75V18h20V6.75L12 13.5zm0-2.25L22 6H2l10 5.25z"/>
+        </svg>
+        <input type="email" name="email" id="{{ form.email.id_for_label }}" placeholder="Enter your email" required autocomplete="email" value="{{ form.email.value|default_if_none:'' }}">
+      </div>
+
+      <!-- Password -->
+      <label for="{{ form.password1.id_for_label }}">Password</label>
+      {{ form.password1.errors }}
+      <div class="form-group">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6z"/>
+        </svg>
+        <input type="password" name="password1" id="{{ form.password1.id_for_label }}" placeholder="Create a password" required autocomplete="new-password">
+      </div>
+
+      <!-- Confirm Password -->
+      <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+      {{ form.password2.errors }}
+      <div class="form-group">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6z"/>
+        </svg>
+        <input type="password" name="password2" id="{{ form.password2.id_for_label }}" placeholder="Confirm your password" required autocomplete="new-password">
+      </div>
+
+      <button type="submit">Register</button>
+    </form>
+    
+    <p class="text-center">
+      Already have an account? <a href="/login/">Login here</a>
+    </p>
+  </div>
+</main>
+
+</body>
+</html>

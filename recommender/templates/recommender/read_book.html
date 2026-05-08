@@ -1,0 +1,789 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{ book.title }} - Read</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+:root {
+    --primary: #4F46E5;
+    --secondary: #7C3AED;
+    --accent: #06B6D4;
+    --main-bg: #1a2332;
+    --sidebar-bg: rgba(26, 35, 50, 0.95);
+    --card-bg: #243447;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --gradient-primary: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #06B6D4 100%);
+    --glow-blue: rgba(79, 70, 229, 0.4);
+    --glow-purple: rgba(124, 58, 237, 0.4);
+    --reading-bg-light: #ffffff;
+    --reading-bg-dark: #1e2538;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--main-bg);
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+/* === SIDEBAR === */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100vh;
+    background: var(--sidebar-bg);
+    border-right: 1px solid rgba(79, 70, 229, 0.2);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1.2rem;
+    overflow-y: auto;
+    box-shadow: 5px 0 30px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.sidebar .logo {
+    font-size: 1.85rem;
+    font-weight: 900;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    letter-spacing: -0.5px;
+    filter: drop-shadow(0 0 15px var(--glow-blue));
+    animation: pulse 3s ease-in-out infinite;
+    margin-bottom: 30px;
+}
+
+@keyframes pulse {
+    0%, 100% { filter: drop-shadow(0 0 15px var(--glow-blue)); }
+    50% { filter: drop-shadow(0 0 25px var(--glow-purple)); }
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.sidebar nav a {
+    display: block;
+    padding: 0.85rem 1.1rem;
+    background: transparent;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 11px;
+    font-weight: 600;
+    font-size: 0.93rem;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar nav a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-primary);
+    opacity: 0.1;
+    transition: left 0.4s ease;
+    z-index: 0;
+}
+
+.sidebar nav a:hover::before {
+    left: 0;
+}
+
+.sidebar nav a:hover {
+    color: var(--text-primary);
+    background: rgba(36, 52, 71, 0.5);
+    border-color: rgba(79, 70, 229, 0.3);
+    transform: translateX(5px);
+}
+
+.sidebar nav a.active {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 5px 20px rgba(79, 70, 229, 0.4);
+}
+
+/* === PROFILE CARD === */
+.profile-card {
+    margin-top: auto;
+    background: rgba(36, 52, 71, 0.6);
+    padding: 1.2rem 1rem;
+    border-radius: 14px;
+    text-align: center;
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+    border-color: rgba(79, 70, 229, 0.5);
+    box-shadow: 0 10px 40px rgba(79, 70, 229, 0.3);
+    transform: translateY(-5px);
+}
+
+.profile-card img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    background: var(--gradient-primary);
+    padding: 3px;
+    margin-bottom: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.profile-card:hover img {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 0 30px var(--glow-blue);
+}
+
+.profile-card p {
+    color: var(--text-secondary);
+    font-size: 0.83rem;
+    margin-bottom: 0.4rem;
+    word-wrap: break-word;
+    max-width: 100%;
+}
+
+.profile-card p strong {
+    color: var(--text-primary);
+    font-size: 1.02rem;
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+}
+
+.profile-actions a {
+    display: block;
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.68rem 0.8rem;
+    text-decoration: none;
+    border-radius: 9px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(79, 70, 229, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.profile-actions a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(79, 70, 229, 0.5);
+}
+
+.profile-actions a:last-child {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    box-shadow: 0 5px 20px rgba(239, 68, 68, 0.3);
+}
+
+.profile-actions a:last-child:hover {
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5);
+}
+
+/* === MAIN CONTENT === */
+.main-content {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    padding: 10px 25px;
+    overflow-x: hidden;
+    background: var(--main-bg);
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* === BOOK HEADER === */
+.book-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative;
+    margin-bottom: 8px;
+    padding: 0.4rem 0.7rem;
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.book-header .back-btn {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--gradient-primary) !important;
+    border: none !important;
+    color: white !important;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(79, 70, 229, 0.4);
+    padding: 0.35rem 0.65rem !important;
+    font-size: 0.8rem !important;
+}
+
+.book-header .back-btn:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.6);
+}
+
+.book-header .info {
+    text-align: center;
+    margin: 0 10px;
+}
+
+.book-header .info h2 {
+    font-size: 1.1rem;
+    margin: 0;
+    line-height: 1.2;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+.book-header .info p {
+    font-size: 0.75rem;
+    margin: 0.2rem 0 0 0;
+    color: var(--text-secondary);
+}
+
+.book-header .info p strong {
+    color: var(--accent);
+}
+
+/* === BOOK ACTIONS === */
+.book-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 3px;
+    gap: 0.3rem;
+}
+
+.book-actions button,
+.book-actions a {
+    padding: 0.35rem 0.6rem !important;
+    font-size: 0.8rem !important;
+    border-radius: 5px !important;
+    border: 1px solid rgba(79, 70, 229, 0.3) !important;
+    background: rgba(79, 70, 229, 0.15) !important;
+    color: var(--text-primary) !important;
+    transition: all 0.3s ease !important;
+    margin: 1px !important;
+}
+
+.book-actions button:hover,
+.book-actions a:hover {
+    background: rgba(79, 70, 229, 0.3) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4) !important;
+}
+
+.book-actions input[type=number] {
+    width: 65px;
+    padding: 0.35rem 0.5rem;
+    background: rgba(26, 35, 50, 0.7);
+    border: 1px solid rgba(79, 70, 229, 0.3);
+    color: var(--text-primary);
+    border-radius: 5px;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.book-actions input[type=number]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+}
+
+.book-actions .dropdown-menu {
+    background: var(--card-bg);
+    border: 1px solid rgba(79, 70, 229, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.book-actions .dropdown-item {
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+}
+
+.book-actions .dropdown-item:hover {
+    background: rgba(79, 70, 229, 0.2);
+    color: var(--text-primary);
+}
+
+/* === READING AREA === */
+.reading-area {
+    height: calc(100vh - 110px);
+    overflow-y: scroll;
+    padding: 20px 20px;
+    background-color: var(--reading-bg-dark);
+    color: var(--text-primary);
+    line-height: 1.8;
+    font-size: 18px;
+    word-wrap: break-word;
+    text-align: left;
+    border-radius: 8px;
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+}
+
+.reading-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+.reading-area::-webkit-scrollbar-track {
+    background: rgba(26, 35, 50, 0.5);
+}
+
+.reading-area::-webkit-scrollbar-thumb {
+    background: var(--gradient-primary);
+    border-radius: 10px;
+}
+
+.reading-area::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+}
+
+/* === BOOK PAGE === */
+.book-page {
+    margin-bottom: 40px;
+    scroll-margin-top: 100px;
+}
+
+.book-page p {
+    margin: 0 0 1.5em 0;
+    line-height: 1.9;
+    text-align: left;
+    white-space: pre-line;
+    color: var(--text-secondary);
+}
+
+.book-page blockquote {
+    margin: 0.8em 2em;
+    font-style: italic;
+    color: var(--accent);
+    border-left: 4px solid var(--accent);
+    padding-left: 15px;
+    background: rgba(6, 182, 212, 0.1);
+    border-radius: 6px;
+    padding: 12px 15px;
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+}
+
+.book-page h3 {
+    margin-top: 2em;
+    margin-bottom: 0.8em;
+    font-size: 1.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 6px;
+    filter: drop-shadow(0 0 10px var(--glow-blue));
+}
+
+.book-page ul {
+    margin: 1em 0 1em 2em;
+    color: var(--text-secondary);
+}
+
+.book-page ul li {
+    margin-bottom: 0.5em;
+    line-height: 1.7;
+}
+
+.separator {
+    text-align: center;
+    margin: 2em 0;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+}
+
+/* === PAGE INFO === */
+.page-info {
+    position: fixed;
+    bottom: 8px;
+    right: 25px;
+    background: var(--gradient-primary);
+    color: #fff;
+    padding: 0.3rem 0.7rem;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    box-shadow: 0 3px 12px rgba(79, 70, 229, 0.5);
+    z-index: 999;
+}
+
+/* === HIGHLIGHT === */
+.highlight {
+    background: linear-gradient(135deg, rgba(255, 255, 0, 0.4) 0%, rgba(255, 200, 0, 0.5) 100%);
+    cursor: text;
+    transition: all 0.2s ease;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.highlight:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 0, 0.6) 0%, rgba(255, 200, 0, 0.7) 100%);
+}
+
+/* === LIGHT MODE === */
+.reading-area.light-mode {
+    background-color: var(--reading-bg-light);
+    color: #1a2332;
+}
+
+.reading-area.light-mode .book-page p {
+    color: #4a5568;
+}
+
+.reading-area.light-mode .book-page blockquote {
+    background: rgba(79, 70, 229, 0.05);
+    color: var(--secondary);
+}
+
+.reading-area.light-mode .book-page ul {
+    color: #4a5568;
+}
+
+/* === NOTIFICATION === */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--gradient-primary);
+    color: #fff;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    z-index: 9999;
+    font-weight: 600;
+    font-size: 0.85rem;
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.6);
+    animation: slideInRight 0.4s ease;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    .book-header {
+        flex-direction: column;
+        padding: 0.8rem;
+    }
+    .book-header .back-btn {
+        position: static;
+        transform: none;
+        margin-bottom: 0.5rem;
+    }
+    .reading-area {
+        padding: 1.5rem 1rem;
+    }
+}
+/* === SCROLLBAR === */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: var(--sidebar-bg);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--main-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: 10px;
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="logo">📚 BookWise</div>
+    <nav>
+        <a href="{% url 'recommender:dashboard' %}" class="active">Dashboard</a>
+        <a href="{% url 'recommender:browse_books' %}">Browse</a>
+        <a href="{% url 'recommender:recommendations' %}">Recommendations</a>
+    </nav>
+    <div class="profile-card">
+        {% if user.profile.image %}
+            <img src="{{ user.profile.image.url }}" alt="Profile Picture">
+        {% else %}
+            <img src="{% static 'img/profile.jpg' %}" alt="Profile Picture">
+        {% endif %}
+        <p><strong>{{ user.username }}</strong></p>
+        <p>{{ user.email }}</p>
+        <p>Read: {{ books_read|default:0 }} | Favorites: {{ favorites_count|default:0 }}</p>
+        <div class="profile-actions">
+            <a href="{% url 'accounts:profile' %}">Profile Settings</a>
+            <a href="{% url 'accounts:logout' %}">Logout</a>
+        </div>
+    </div>
+</aside>
+
+<div class="main-content">
+    <div class="book-header">
+        <a href="{% url 'recommender:book_detail' book.id %}" class="btn btn-sm btn-secondary back-btn" title="Back to Detail">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+
+        <div class="info">
+            <h2>{{ book.title }}</h2>
+            <p><strong>Author:</strong> {{ book.display_author }} </p>
+        </div>
+
+        <div class="book-actions d-flex align-items-center flex-wrap">
+            <button id="highlightBtn" class="btn btn-sm btn-light" onclick="toggleHighlight()" title="Highlight/Unhighlight">
+                <i class="bi bi-pencil-square"></i>
+            </button>
+            <button class="btn btn-sm btn-secondary" onclick="saveBookmark()" title="Save Bookmark"><i class="bi bi-bookmark-fill"></i></button>
+            <a href="{% url 'recommender:download_book_pdf' book.id %}" class="btn btn-sm btn-secondary" title="Download PDF"><i class="bi bi-download"></i></a>
+            <input type="number" id="gotoPage" min="1" max="{{ total_pages }}" placeholder="Page">
+            <button class="btn btn-sm btn-secondary" onclick="goToPage()" title="Go to Page"><i class="bi bi-arrow-right-circle"></i></button>
+            <button class="btn btn-sm btn-secondary" onclick="changeFont(-1)" title="Decrease Font"><i class="bi bi-fonts"></i>-</button>
+            <button class="btn btn-sm btn-secondary" onclick="changeFont(1)" title="Increase Font"><i class="bi bi-fonts"></i>+</button>
+            <button class="btn btn-sm btn-secondary" onclick="toggleDarkMode()" title="Dark/Light Mode"><i class="bi bi-moon-stars"></i></button>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="tocDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Table of Contents"><i class="bi bi-list-ul"></i></button>
+                <ul class="dropdown-menu" id="tocList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="reading-area" id="readingArea" contenteditable="false">
+        {% for page in pages %}
+            <div class="book-page" data-page="{{ forloop.counter }}">
+                {% for paragraph in page %}
+                    {% if paragraph.type == 'dialogue' %}
+                        <blockquote>{{ paragraph.text }}</blockquote>
+                    {% elif paragraph.type == 'list' %}
+                        <ul>
+                            <li>{{ paragraph.text }}</li>
+                        </ul>
+                    {% elif paragraph.type == 'separator' %}
+                        <div class="separator">{{ paragraph.text }}</div>
+                    {% else %}
+                        <p>{{ paragraph.text|safe }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="page-info" id="pageInfo">Page {{ current_page }} / {{ total_pages }}</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const readingArea = document.getElementById('readingArea');
+const pageInfo = document.getElementById('pageInfo');
+let totalPages = {{ total_pages }};
+let currentPage = {{ current_page }};
+let fontSize = 18;
+let highlightMode = false;
+const highlightBtn = document.getElementById('highlightBtn');
+
+// On load: scroll to current page & build TOC
+window.onload = function() {
+    const targetPage = document.querySelector(`.book-page[data-page='${currentPage}']`);
+    if(targetPage) readingArea.scrollTop = targetPage.offsetTop;
+
+    const tocList = document.getElementById('tocList');
+    let hasChapters = false;
+    document.querySelectorAll('.book-page').forEach(p=>{
+        const h3 = p.querySelector('h3');
+        if(h3){
+            hasChapters = true;
+            const pageNum = p.dataset.page;
+            const title = h3.innerText;
+            let li = document.createElement('li');
+            li.innerHTML = `<a onclick="jumpToPage(${pageNum})" class="dropdown-item" style="cursor:pointer;">${title}</a>`;
+            tocList.appendChild(li);
+        }
+    });
+    if(!hasChapters) document.getElementById('tocDropdown').parentElement.style.display='none';
+}
+
+// Bookmark AJAX
+function saveBookmark() {
+    const pages = document.querySelectorAll('.book-page');
+    let closest = 1;
+    const scrollTop = readingArea.scrollTop;
+    pages.forEach(p => { if(p.offsetTop - scrollTop <=0) closest = parseInt(p.dataset.page); });
+
+    fetch("{% url 'recommender:reader_ajax_view' book.id %}", {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+        body: JSON.stringify({ action: "bookmark", page: closest })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            currentPage = closest;
+            pageInfo.innerText = `Page ${currentPage} / ${totalPages}`;
+            document.getElementById('gotoPage').value = currentPage;
+            showNotification(`✓ Bookmark saved: Page ${closest}`);
+        } else { showNotification(`⚠ Failed to save bookmark`); }
+    })
+    .catch(err => { showNotification('⚠ Error saving bookmark'); console.error(err); });
+}
+
+// Page scroll functions
+function goToPage(){
+    let page = parseInt(document.getElementById('gotoPage').value);
+    if(page<1) page=1;
+    if(page>totalPages) page=totalPages;
+    jumpToPage(page);
+}
+function jumpToPage(page){
+    const target = document.querySelector(`.book-page[data-page='${page}']`);
+    if(target) readingArea.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+}
+
+// Update current page on scroll
+readingArea.addEventListener('scroll', ()=>{
+    const scrollTop = readingArea.scrollTop;
+    const pages = document.querySelectorAll('.book-page');
+    let pageNum = 1;
+    pages.forEach(p=>{ if(p.offsetTop - scrollTop <=0) pageNum=parseInt(p.dataset.page); });
+    currentPage = pageNum;
+    pageInfo.innerText = `Page ${pageNum} / ${totalPages}`;
+    document.getElementById('gotoPage').value = currentPage;
+});
+
+// Font control
+function changeFont(delta){
+    fontSize += delta;
+    if(fontSize<12) fontSize=12;
+    if(fontSize>36) fontSize=36;
+    readingArea.style.fontSize = fontSize+'px';
+    showNotification(`Font size: ${fontSize}px`);
+}
+
+// Dark / Light mode toggle
+let darkMode=true;
+function toggleDarkMode(){
+    darkMode=!darkMode;
+    if(darkMode){
+        readingArea.classList.remove('light-mode');
+        showNotification('🌙 Dark mode enabled');
+    } else {
+        readingArea.classList.add('light-mode');
+        showNotification('☀️ Light mode enabled');
+    }
+}
+
+// Highlight toggle button
+function toggleHighlight(){
+    highlightMode = !highlightMode;
+    if(highlightMode){
+        highlightBtn.style.backgroundColor = 'rgba(255, 255, 0, 0.7)';
+        highlightBtn.style.color = '#000';
+        showNotification('✏️ Highlight mode ON');
+    } else {
+        highlightBtn.style.backgroundColor = '';
+        highlightBtn.style.color = '';
+        showNotification('Highlight mode OFF');
+    }
+}
+
+// Highlight/unhighlight selected text
+document.addEventListener('mouseup', function(e){
+    if(!highlightMode) return;
+    const selection = window.getSelection();
+    if(selection && selection.toString().trim().length>0){
+        const range = selection.getRangeAt(0);
+        let parent = range.commonAncestorContainer.parentNode;
+        if(parent && parent.classList && parent.classList.contains('highlight')){
+            parent.outerHTML = parent.innerHTML; // unhighlight
+        } else {
+            const span = document.createElement('span');
+            span.className='highlight';
+            try { range.surroundContents(span); } catch(err){ console.log('Cannot highlight overlapping selections.'); }
+        }
+        selection.removeAllRanges();
+    }
+});
+
+// Notification
+function showNotification(msg){
+    let notif = document.createElement('div');
+    notif.className = 'notification';
+    notif.innerText = msg;
+    document.body.appendChild(notif);
+    setTimeout(()=>notif.remove(),2500);
+}
+</script>
+</body>
+</html>
