@@ -34,5 +34,5 @@ python manage.py runserver
 ## 📌 Note
 This project is developed for educational purposes.
 
----
+
 
