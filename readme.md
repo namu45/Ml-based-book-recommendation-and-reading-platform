@@ -36,5 +36,3 @@ This project is developed for educational purposes.
 
 ---
 
-## 👤 Author
-Namrata Sharma
